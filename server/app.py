@@ -1,8 +1,12 @@
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_migrate import Migrate
 from models import db, Director, Movie, Review, Rating
 from config import Config
+from dotenv import load_dotenv
+load_dotenv()
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
