@@ -77,7 +77,7 @@ def get_director_movies(director_id):
 def create_review(movie_id):
     data = request.get_json()
     
-    
+    # Create rating first
     rating = Rating(
         movie_id=movie_id,
         rating=data['rating']
@@ -85,7 +85,7 @@ def create_review(movie_id):
     db.session.add(rating)
     db.session.commit()
     
-    
+    # Create review with rating_id
     review = Review(
         movie_id=movie_id,
         rating_id=rating.id,
@@ -94,7 +94,15 @@ def create_review(movie_id):
     db.session.add(review)
     db.session.commit()
     
-    return jsonify({'message': 'Review created successfully'}), 201
+    # Get movie title for response
+    movie = Movie.query.get(movie_id)
+    
+    return jsonify({
+        'id': review.id,
+        'review': review.review,
+        'rating': rating.rating,
+        'movie_title': movie.title
+    }), 201
 
 @app.route('/api/movies/<int:movie_id>/reviews', methods=['GET'])
 def get_movie_reviews(movie_id):
