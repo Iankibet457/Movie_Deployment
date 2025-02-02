@@ -157,6 +157,43 @@ def delete_movie(movie_id):
     db.session.commit()
     return jsonify({'message': 'Movie deleted successfully'}), 200
 
+@app.route('/api/directors/<int:director_id>', methods=['PATCH'])
+def update_director(director_id):
+    director = Director.query.get_or_404(director_id)
+    data = request.get_json()
+    
+    director.name = data.get('name', director.name)
+    director.age = data.get('age', director.age)
+    director.gender = data.get('gender', director.gender)
+    
+    db.session.commit()
+    
+    return jsonify({
+        'id': director.id,
+        'name': director.name,
+        'age': director.age,
+        'gender': director.gender
+    }), 200
+
+@app.route('/api/movies/<int:movie_id>', methods=['PATCH'])
+def update_movie(movie_id):
+    movie = Movie.query.get_or_404(movie_id)
+    data = request.get_json()
+    
+    movie.title = data.get('title', movie.title)
+    if 'director_id' in data:
+        # Verify that the director exists
+        director = Director.query.get_or_404(data['director_id'])
+        movie.director_id = data['director_id']
+    
+    db.session.commit()
+    
+    return jsonify({
+        'id': movie.id,
+        'title': movie.title,
+        'director_id': movie.director_id
+    }), 200
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'error': 'Not found'}), 404
