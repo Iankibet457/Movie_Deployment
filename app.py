@@ -99,19 +99,39 @@ def create_review(movie_id):
 @app.route('/api/movies/<int:movie_id>/reviews', methods=['GET'])
 def get_movie_reviews(movie_id):
     reviews = Review.query.filter_by(movie_id=movie_id).all()
+    movie = Movie.query.get_or_404(movie_id)
     return jsonify([{
         'id': review.id,
         'review': review.review,
-        'rating': Rating.query.get(review.rating_id).rating
+        'rating': Rating.query.get(review.rating_id).rating,
+        'movie_title': movie.title
     } for review in reviews])
 
-@app.route('/api/reviews/<int:review_id>', methods=['PUT'])
+@app.route('/api/reviews/<int:review_id>', methods=['PATCH'])
 def update_review(review_id):
     review = Review.query.get_or_404(review_id)
     data = request.get_json()
-    review.review = data.get('review', review.review)
+    
+    # Update review text
+    if 'review' in data:
+        review.review = data['review']
+    
+    # Update rating if provided
+    if 'rating' in data:
+        rating = Rating.query.get(review.rating_id)
+        if rating:
+            rating.rating = data['rating']
+    
     db.session.commit()
-    return jsonify({'message': 'Review updated successfully'})
+    
+    # Return updated review with movie title
+    movie = Movie.query.get(review.movie_id)
+    return jsonify({
+        'id': review.id,
+        'review': review.review,
+        'rating': Rating.query.get(review.rating_id).rating,
+        'movie_title': movie.title
+    }), 200
 
 @app.route('/api/reviews/<int:review_id>', methods=['DELETE'])
 def delete_review(review_id):
