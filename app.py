@@ -191,7 +191,8 @@ def update_movie(movie_id):
     return jsonify({
         'id': movie.id,
         'title': movie.title,
-        'director_id': movie.director_id
+        'director_id': movie.director_id,
+        'director': Director.query.get(movie.director_id).name
     }), 200
 
 @app.errorhandler(404)
